@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -105,10 +106,24 @@ public class LaView extends View {
         canvas.drawRect(rf, paint1);
         canvas.drawArc(rf, originalStartAngleOffset, sweepAngle, true, paint2);
     }
-
+    float startScrollX;
+    float startScrollY;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
+        int action = MotionEventCompat.getActionMasked(event);
+        switch (action){
+            case MotionEvent.ACTION_DOWN:
+                startScrollX = event.getX();
+                startScrollY = event.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                //四个方向的旋转生肖
+                break;
+            case MotionEvent.ACTION_UP:
+
+                break;
+        }
         return true;
     }
 }
