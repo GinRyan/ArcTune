@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
@@ -32,17 +31,26 @@ public class LaView extends View {
         init(attrs, defStyle);
     }
 
-    Paint paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
     Paint paint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
     TextPaint textPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
     RectF rf = null;
 
+    int pieColor = 0;
 
     private void init(AttributeSet attrs, int defStyle) {
-        // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.LaView, defStyle, 0);
         a.recycle();
+        invalidateArc();
+    }
+
+    public void setPieColor(int pieColor) {
+        this.pieColor = pieColor;
+    }
+
+    @SuppressWarnings("ResourceType")
+    public void setPieColor(String rrggbb) {
+        this.pieColor = Color.parseColor(rrggbb);
     }
 
     @Override
@@ -55,7 +63,6 @@ public class LaView extends View {
     float circleCenterX = 0;
     //圆心y坐标
     float circleCenterY = 0;
-
     //最大进度
     float maxProgress = 100f;
     //当前进度
@@ -78,9 +85,6 @@ public class LaView extends View {
         nextSweepAngle = 360 * nextProgressRatio;
         refreshProgressEffectAnimate();
     }
-
-    float nextSweepAngle;
-    float nextProgressRatio;
 
     /**
      * 开始不停刷新数值并提醒界面更新
@@ -109,24 +113,19 @@ public class LaView extends View {
      */
     private void invalidateArc() {
         raduis = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
-                getHeight() - getPaddingTop() - getPaddingBottom()) / 2;
-        float left = startPointX + getPaddingLeft();
-        float top = startPointY + getPaddingTop();
-        float right = left + raduis * 2;
-        float bottom = top + raduis * 2;
+                getHeight() - getPaddingTop() - getPaddingBottom()) / 2 - 1;
+        float left = startPointX + getPaddingLeft() + strokeWidth;
+        float top = startPointY + getPaddingTop() + strokeWidth;
+        float right = left + raduis * 2 - strokeWidth;
+        float bottom = top + raduis * 2 - strokeWidth;
         rf = new RectF(left, top, right, bottom);
         circleCenterX = (right + left) / 2;
         circleCenterY = (top + bottom) / 2;
 
-        paint1.setColor(Color.parseColor("#ed57ba"));
-        paint1.setDither(true);
-        paint1.setStyle(Paint.Style.STROKE);
-        paint1.setStrokeWidth(6);
-
-        paint2.setColor(Color.parseColor("#ed57ba"));
+        paint2.setColor(pieColor);
         paint2.setDither(true);
         paint2.setStyle(Paint.Style.FILL_AND_STROKE);
-        paint2.setStrokeWidth(6);
+        paint2.setStrokeWidth(strokeWidth);
         invalidate();
     }
 
@@ -134,6 +133,18 @@ public class LaView extends View {
         this.raduis = raduis;
     }
 
+    /**
+     * 下一个扫描角度
+     */
+    float nextSweepAngle;
+    /**
+     * 下一个进度比例
+     */
+    float nextProgressRatio;
+    /**
+     * 线宽
+     */
+    float strokeWidth = 6;
     /**
      * 圆弧的半径，正方形范围的一半
      */
@@ -174,7 +185,6 @@ public class LaView extends View {
                 startScrollY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                //四个方向的旋转生肖
                 break;
             case MotionEvent.ACTION_UP:
 
