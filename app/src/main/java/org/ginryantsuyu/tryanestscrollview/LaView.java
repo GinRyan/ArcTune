@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -55,6 +56,57 @@ public class LaView extends View {
     //圆心y坐标
     float circleCenterY = 0;
 
+    //最大进度
+    float maxProgress = 100f;
+    //当前进度
+    float currentProgress = 0f;
+    //下一阶进度
+    float nextProgress = 0f;
+    //进度比例，用于绘制进度时计算角度值
+    float progressRatio = 0.0f;
+
+    public void setMaxProgress(float maxProgress) {
+        this.maxProgress = maxProgress;
+    }
+
+    public void setNextProgress(float nextProgress) {
+        this.nextProgress = nextProgress;
+        progressRatio = currentProgress / maxProgress;
+        nextProgressRatio = nextProgress / maxProgress;
+
+        sweepAngle = 360 * progressRatio;
+        nextSweepAngle = 360 * nextProgressRatio;
+        refreshProgressEffectAnimate();
+    }
+
+    float nextSweepAngle;
+    float nextProgressRatio;
+
+    /**
+     * 开始不停刷新数值并提醒界面更新
+     */
+    public void refreshProgressEffectAnimate() {
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (sweepAngle < nextSweepAngle) {
+                    if (sweepAngle <= 360) {
+                        sweepAngle++;
+                        Log.d("angle", "sweepAngle:  " + sweepAngle);
+                        invalidate();
+                        refreshProgressEffectAnimate();
+                    }
+                } else {
+                    currentProgress = nextProgress;
+                    invalidate();
+                }
+            }
+        }, 8);
+    }
+
+    /**
+     * 初始化
+     */
     private void invalidateArc() {
         raduis = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
                 getHeight() - getPaddingTop() - getPaddingBottom()) / 2;
@@ -82,7 +134,10 @@ public class LaView extends View {
         this.raduis = raduis;
     }
 
-    float raduis = 0f;//圆弧的半径，正方形范围的一半
+    /**
+     * 圆弧的半径，正方形范围的一半
+     */
+    float raduis = 0f;
     /**
      * 圆弧所在矩形起始x坐标
      */
@@ -103,16 +158,17 @@ public class LaView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawRect(rf, paint1);
         canvas.drawArc(rf, originalStartAngleOffset, sweepAngle, true, paint2);
     }
+
     float startScrollX;
     float startScrollY;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         int action = MotionEventCompat.getActionMasked(event);
-        switch (action){
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 startScrollX = event.getX();
                 startScrollY = event.getY();
