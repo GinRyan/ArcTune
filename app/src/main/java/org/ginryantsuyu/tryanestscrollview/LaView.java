@@ -2,16 +2,23 @@ package org.ginryantsuyu.tryanestscrollview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.MaskFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import android.graphics.Xfermode;
 import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.text.DecimalFormat;
 
 public class LaView extends View {
 
@@ -32,10 +39,15 @@ public class LaView extends View {
     }
 
     Paint paint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
-    TextPaint textPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
     RectF rf = null;
-
+    /**
+     * pie图颜色
+     */
     int pieColor = 0;
+    /**
+     * 显示文字颜色
+     */
+    int showingTextColor = 0;
 
     private void init(AttributeSet attrs, int defStyle) {
         final TypedArray a = getContext().obtainStyledAttributes(
@@ -44,6 +56,24 @@ public class LaView extends View {
         invalidateArc();
     }
 
+    /**
+     * 显示文本颜色
+     *
+     * @param showingTextColor
+     */
+    public void setShowingTextColor(int showingTextColor) {
+        this.showingTextColor = showingTextColor;
+    }
+
+    public void setShowingTextColor(String rrggbb) {
+        this.showingTextColor = Color.parseColor(rrggbb);
+    }
+
+    /**
+     * pie图颜色
+     *
+     * @param pieColor
+     */
     public void setPieColor(int pieColor) {
         this.pieColor = pieColor;
     }
@@ -86,6 +116,8 @@ public class LaView extends View {
         refreshProgressEffectAnimate();
     }
 
+    float showingPercent = 0f;
+
     /**
      * 开始不停刷新数值并提醒界面更新
      */
@@ -94,8 +126,9 @@ public class LaView extends View {
             @Override
             public void run() {
                 if (sweepAngle < nextSweepAngle) {
-                    if (sweepAngle <= 360) {
+                    if (sweepAngle < 360) {
                         sweepAngle++;
+                        showingPercent = sweepAngle / 360;
                         Log.d("angle", "sweepAngle:  " + sweepAngle);
                         invalidate();
                         refreshProgressEffectAnimate();
@@ -108,12 +141,14 @@ public class LaView extends View {
         }, 8);
     }
 
+    float mShowingTextSize = 40;
+
     /**
      * 初始化
      */
     private void invalidateArc() {
         raduis = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
-                getHeight() - getPaddingTop() - getPaddingBottom()) / 2 - 1;
+                getHeight() - getPaddingTop() - getPaddingBottom()) / 2 - strokeWidth;
         float left = startPointX + getPaddingLeft() + strokeWidth;
         float top = startPointY + getPaddingTop() + strokeWidth;
         float right = left + raduis * 2 - strokeWidth;
@@ -122,10 +157,16 @@ public class LaView extends View {
         circleCenterX = (right + left) / 2;
         circleCenterY = (top + bottom) / 2;
 
+        textPaint.setColor(showingTextColor);
+        textPaint.setDither(true);
+        textPaint.setTextSize(mShowingTextSize);
+
+
         paint2.setColor(pieColor);
         paint2.setDither(true);
         paint2.setStyle(Paint.Style.FILL_AND_STROKE);
         paint2.setStrokeWidth(strokeWidth);
+        paint2.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
         invalidate();
     }
 
@@ -166,30 +207,20 @@ public class LaView extends View {
      */
     float sweepAngle = 240;
 
+    TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    String textShowing = "75%";
+    DecimalFormat decimalFormat = new DecimalFormat("##");
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawArc(rf, originalStartAngleOffset, sweepAngle, true, paint2);
-    }
-
-    float startScrollX;
-    float startScrollY;
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
-        int action = MotionEventCompat.getActionMasked(event);
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                startScrollX = event.getX();
-                startScrollY = event.getY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                break;
-            case MotionEvent.ACTION_UP:
-
-                break;
+        textShowing = decimalFormat.format(showingPercent * 100) + "%";
+        if (isInEditMode()) {
+            sweepAngle = 75;
         }
-        return true;
+        canvas.drawArc(rf, originalStartAngleOffset, sweepAngle, true, paint2);
+        float textWidth = textPaint.measureText(textShowing);
+        canvas.drawText(textShowing, circleCenterX - textWidth / 2, circleCenterY + mShowingTextSize / 2, textPaint);
     }
+
 }

@@ -18,7 +18,8 @@ public class MainActivity extends AppCompatActivity {
         this.refreshbutton = (Button) findViewById(R.id.refresh_button);
         this.lavapie = (LaView) findViewById(R.id.lavapie);
         lavapie.setMaxProgress(100);
-        lavapie.setPieColor("#19bbed");
+        lavapie.setPieColor("#512DA8");
+        lavapie.setShowingTextColor("#D1C4E9");
         System.out.println("start ");
         lavapie.setNextProgress(progress);
         refreshbutton.setOnClickListener(new View.OnClickListener() {
