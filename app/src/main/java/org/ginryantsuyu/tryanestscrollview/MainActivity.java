@@ -17,19 +17,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.refreshbutton = (Button) findViewById(R.id.refresh_button);
         this.lavapie = (LaView) findViewById(R.id.lavapie);
+
         lavapie.setMaxProgress(100);
         lavapie.setPieColor("#512DA8");
         lavapie.setShowingTextColor("#D1C4E9");
-        System.out.println("start ");
         lavapie.setNextProgress(progress);
         refreshbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progress += 5;
-                lavapie.setNextProgress(progress);
+                if (progress < 100) {
+                    progress += 5;
+                    lavapie.setNextProgress(progress);
+                }
             }
         });
     }
-
-    Handler handler = new Handler();
 }

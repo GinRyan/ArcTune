@@ -21,7 +21,7 @@ import android.view.View;
 import java.text.DecimalFormat;
 
 public class LaView extends View {
-
+    public static final boolean DEBUG = false;
 
     public LaView(Context context) {
         super(context);
@@ -125,15 +125,27 @@ public class LaView extends View {
         postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (sweepAngle < nextSweepAngle) {
+                if ((int) sweepAngle < (int) nextSweepAngle) {
                     if (sweepAngle < 360) {
                         sweepAngle++;
                         showingPercent = sweepAngle / 360;
-                        Log.d("angle", "sweepAngle:  " + sweepAngle);
+                        if (DEBUG)
+                            Log.d("angle", "sweepAngle:  " + sweepAngle + " ---nextSweepAngle:  " + nextSweepAngle);
+                        invalidate();
+                        refreshProgressEffectAnimate();
+                    }
+                } else if ((int) sweepAngle > (int) nextSweepAngle) {
+                    if (sweepAngle > 0) {
+                        sweepAngle--;
+                        showingPercent = sweepAngle / 360;
+                        if (DEBUG)
+                            Log.d("angle", "sweepAngle:  " + sweepAngle + " ---nextSweepAngle:  " + nextSweepAngle);
                         invalidate();
                         refreshProgressEffectAnimate();
                     }
                 } else {
+                    if (DEBUG)
+                        Log.d("angle", "stop");
                     currentProgress = nextProgress;
                     invalidate();
                 }
