@@ -56,6 +56,27 @@ public class LaView extends View {
         invalidateArc();
     }
 
+    public static final int STROKE = 1;
+    public static final int FILL = 2;
+
+    /**
+     * 画笔样式
+     * <pre>
+     * 可选值： STROKE——空心描边样式
+     *          FILL——实心描边样式
+     * </pre>
+     *
+     * @param paintStyle
+     */
+    public void setPaintStyle(int paintStyle) {
+        this.paintStyle = paintStyle;
+    }
+
+    /**
+     * 画笔样式
+     */
+    private int paintStyle = 2;
+
     /**
      * 显示文本颜色
      *
@@ -150,8 +171,10 @@ public class LaView extends View {
                     invalidate();
                 }
             }
-        }, 8);
+        }, 5);
     }
+
+
 
     float mShowingTextSize = 40;
 
@@ -159,6 +182,7 @@ public class LaView extends View {
      * 初始化
      */
     private void invalidateArc() {
+
         raduis = Math.min(getWidth() - getPaddingLeft() - getPaddingRight(),
                 getHeight() - getPaddingTop() - getPaddingBottom()) / 2 - strokeWidth;
         float left = startPointX + getPaddingLeft() + strokeWidth;
@@ -176,7 +200,16 @@ public class LaView extends View {
 
         paint2.setColor(pieColor);
         paint2.setDither(true);
-        paint2.setStyle(Paint.Style.FILL_AND_STROKE);
+        switch (paintStyle) {
+            case STROKE:
+                paint2.setStyle(Paint.Style.STROKE);
+                break;
+            case FILL:
+                paint2.setStyle(Paint.Style.FILL_AND_STROKE);
+                break;
+            default:
+                paint2.setStyle(Paint.Style.FILL_AND_STROKE);
+        }
         paint2.setStrokeWidth(strokeWidth);
         paint2.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
         invalidate();

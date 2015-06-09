@@ -14,6 +14,14 @@
         android:layout_width="100dp"
         android:layout_height="100dp" />
 
+    <org.ginryantsuyu.tryanestscrollview.LaView
+        android:id="@+id/lavapie2"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignTop="@+id/lavapie"
+        android:layout_toLeftOf="@+id/refresh_button"
+        android:layout_toStartOf="@+id/refresh_button" />
+
     <Button
         android:id="@+id/refresh_button"
         android:layout_width="wrap_content"
